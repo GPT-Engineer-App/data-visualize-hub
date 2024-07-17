@@ -11,15 +11,19 @@ const DatasetBox = ({ dataset, isActive, onClick }) => {
   };
 
   return (
-    <Card className="relative w-[250px] h-[100px] m-[10px] cursor-pointer" onClick={onClick}>
-      <CardContent className="p-4">
+    <Card 
+      className="relative w-[270px] h-[100px] m-[5px] cursor-pointer shadow-md hover:shadow-lg transition-shadow duration-300"
+      style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+      onClick={onClick}
+    >
+      <CardContent className="p-2">
         <h3 className="font-bold truncate">{dataset.name}</h3>
         <p className="text-sm">Rows: {dataset.rowCount}</p>
         <p className="text-sm">Columns: {dataset.columnCount}</p>
         <p className="text-sm">Size: {formatFileSize(dataset.fileSize)}</p>
       </CardContent>
-      <div className="absolute top-2 right-2 w-6 h-6 border-2 border-gray-300 rounded-sm flex items-center justify-center">
-        {isActive && <Check className="w-4 h-4 text-green-500" />}
+      <div className="absolute top-2 right-2 w-4 h-4 border-2 border-gray-300 rounded-sm flex items-center justify-center">
+        {isActive && <Check className="w-3 h-3 text-green-500" />}
       </div>
     </Card>
   );
@@ -42,7 +46,7 @@ const Data = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Uploaded Datasets</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="flex flex-wrap gap-[10px]">
         {datasets.map((dataset, index) => (
           <DatasetBox
             key={index}

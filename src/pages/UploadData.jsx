@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +30,7 @@ const UploadData = () => {
     parseFile(selectedFile);
   };
 
-  const parseFile = (file) => {
+  const parseFile = useCallback((file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target.result;
@@ -49,7 +49,13 @@ const UploadData = () => {
       setShowPreview(true);
     };
     reader.readAsText(file);
-  };
+  }, [useHeaderRow]);
+
+  useEffect(() => {
+    if (file) {
+      parseFile(file);
+    }
+  }, [file, useHeaderRow, parseFile]);
 
   const saveDataset = () => {
     if (file) {
@@ -88,7 +94,7 @@ const UploadData = () => {
           <DialogHeader>
             <DialogTitle>Data Preview</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-auto">
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
