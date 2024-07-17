@@ -3,12 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import Papa from 'papaparse';
 import { useNavigate } from 'react-router-dom';
 
 const UploadData = () => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [useHeaderRow, setUseHeaderRow] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,7 +37,7 @@ const UploadData = () => {
       let parsedData;
 
       if (file.name.endsWith('.csv')) {
-        parsedData = Papa.parse(content, { header: true, preview: 50 }).data;
+        parsedData = Papa.parse(content, { header: useHeaderRow, preview: 50 }).data;
       } else if (file.name.endsWith('.json')) {
         parsedData = JSON.parse(content).slice(0, 50);
       } else if (file.name.endsWith('.xml')) {
@@ -41,6 +46,7 @@ const UploadData = () => {
       }
 
       setPreview(parsedData);
+      setShowPreview(true);
     };
     reader.readAsText(file);
   };
@@ -48,8 +54,15 @@ const UploadData = () => {
   const saveDataset = () => {
     if (file) {
       const datasets = JSON.parse(localStorage.getItem('datasets') || '[]');
-      datasets.push({ name: file.name, date: new Date().toISOString() });
+      datasets.push({
+        name: file.name,
+        date: new Date().toISOString(),
+        rowCount: preview.length,
+        columnCount: Object.keys(preview[0]).length,
+        fileSize: file.size
+      });
       localStorage.setItem('datasets', JSON.stringify(datasets));
+      setShowPreview(false);
       navigate('/data');
     }
   };
@@ -68,25 +81,24 @@ const UploadData = () => {
             onChange={handleFileChange}
             className="mb-4"
           />
-          <Button onClick={saveDataset} disabled={!file}>Save Dataset</Button>
         </CardContent>
       </Card>
-      {preview && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Data Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Data Preview</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {Object.keys(preview[0]).map((header, index) => (
+                  {preview && Object.keys(preview[0]).map((header, index) => (
                     <TableHead key={index}>{header}</TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {preview.map((row, rowIndex) => (
+                {preview && preview.map((row, rowIndex) => (
                   <TableRow key={rowIndex}>
                     {Object.values(row).map((cell, cellIndex) => (
                       <TableCell key={cellIndex}>{cell}</TableCell>
@@ -95,9 +107,20 @@ const UploadData = () => {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          <div className="flex items-center space-x-2 mt-4">
+            <Switch
+              id="use-header"
+              checked={useHeaderRow}
+              onCheckedChange={setUseHeaderRow}
+            />
+            <Label htmlFor="use-header">Use First Row as Header</Label>
+          </div>
+          <DialogFooter>
+            <Button onClick={saveDataset}>Save Dataset</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
