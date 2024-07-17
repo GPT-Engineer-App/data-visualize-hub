@@ -26,24 +26,32 @@ const BarChart = ({ data }) => {
         label: 'Bar Data',
         data: data,
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
       },
     ],
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
       },
       title: {
         display: true,
-        text: 'Bar Chart',
+        text: 'Real-time Bar Chart',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
       },
     },
   };
 
-  return <Bar data={chartData} options={options} />;
+  return <Bar data={chartData} options={options} height={300} />;
 };
 
 export default BarChart;

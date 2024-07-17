@@ -28,6 +28,7 @@ const LineChart = ({ data }) => {
         label: 'Line Data',
         data: data,
         borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.1,
       },
     ],
@@ -35,18 +36,24 @@ const LineChart = ({ data }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
       },
       title: {
         display: true,
-        text: 'Line Chart',
+        text: 'Real-time Line Chart',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
       },
     },
   };
 
-  return <Line data={chartData} options={options} />;
+  return <Line data={chartData} options={options} height={300} />;
 };
 
 export default LineChart;

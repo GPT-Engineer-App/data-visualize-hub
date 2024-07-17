@@ -36,12 +36,20 @@ const ScatterPlot = ({ data }) => {
 
     svg.selectAll('circle')
       .data(data)
-      .enter()
-      .append('circle')
+      .join('circle')
       .attr('cx', d => x(d.x))
       .attr('cy', d => y(d.y))
       .attr('r', 5)
-      .style('fill', '#69b3a2');
+      .style('fill', '#69b3a2')
+      .style('opacity', 0.7);
+
+    // Add title
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', 0 - (margin.top / 2))
+      .attr('text-anchor', 'middle')
+      .style('font-size', '16px')
+      .text('Real-time Scatter Plot');
 
   }, [data]);
 

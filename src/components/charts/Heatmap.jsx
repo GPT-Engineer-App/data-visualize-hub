@@ -7,7 +7,7 @@ const Heatmap = ({ data }) => {
   useEffect(() => {
     if (!data || data.length === 0) return;
 
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+    const margin = { top: 30, right: 30, bottom: 30, left: 30 };
     const width = 400 - margin.left - margin.right;
     const height = 300 - margin.top - margin.bottom;
 
@@ -46,6 +46,14 @@ const Heatmap = ({ data }) => {
       .attr('width', x.bandwidth())
       .attr('height', y.bandwidth())
       .style('fill', d => colorScale(d));
+
+    // Add title
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', 0 - (margin.top / 2))
+      .attr('text-anchor', 'middle')
+      .style('font-size', '16px')
+      .text('Real-time Heatmap');
 
   }, [data]);
 
