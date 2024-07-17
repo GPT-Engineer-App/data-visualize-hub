@@ -46,16 +46,20 @@ const Data = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Uploaded Datasets</h1>
-      <div className="flex flex-wrap gap-[10px]">
-        {datasets.map((dataset, index) => (
-          <DatasetBox
-            key={index}
-            dataset={dataset}
-            isActive={dataset.name === activeDataset}
-            onClick={() => handleDatasetClick(dataset)}
-          />
-        ))}
-      </div>
+      {datasets.length === 0 ? (
+        <p>No datasets uploaded yet.</p>
+      ) : (
+        <div className="flex flex-wrap gap-[10px]">
+          {datasets.map((dataset, index) => (
+            <DatasetBox
+              key={index}
+              dataset={dataset}
+              isActive={dataset.name === activeDataset}
+              onClick={() => handleDatasetClick(dataset)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

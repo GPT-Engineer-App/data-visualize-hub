@@ -20,10 +20,11 @@ const UploadData = () => {
   useEffect(() => {
     const savedFileData = localStorage.getItem('uploadedFileData');
     if (savedFileData) {
-      const { file, preview, totalRows } = JSON.parse(savedFileData);
-      setFile(file);
+      const { fileName, fileSize, preview, totalRows } = JSON.parse(savedFileData);
+      setFile({ name: fileName, size: fileSize });
       setPreview(preview);
       setTotalRows(totalRows);
+      setShowPreview(true);
     }
   }, []);
 
@@ -74,7 +75,8 @@ const UploadData = () => {
 
   const saveToLocalStorage = (file, preview, totalRows) => {
     const fileData = {
-      file: { name: file.name, size: file.size },
+      fileName: file.name,
+      fileSize: file.size,
       preview,
       totalRows
     };
@@ -117,6 +119,11 @@ const UploadData = () => {
             onChange={handleFileChange}
             className="mb-4"
           />
+          {file && (
+            <p className="text-sm text-gray-500">
+              Selected file: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+            </p>
+          )}
         </CardContent>
       </Card>
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
