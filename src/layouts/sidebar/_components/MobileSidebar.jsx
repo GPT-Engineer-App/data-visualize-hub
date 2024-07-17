@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Package2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { navItems } from "../App";
-import { SidebarNavLink } from "./_components_sidebar/SidebarNavLink";
+import { navItems } from "../../../nav-items";
+import { SidebarNavLink } from "./SidebarNavLink";
 
 export const MobileSidebar = () => (
   <Sheet>
