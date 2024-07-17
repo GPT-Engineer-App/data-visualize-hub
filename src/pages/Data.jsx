@@ -17,7 +17,7 @@ const DatasetBox = ({ dataset, isActive, onClick }) => {
       onClick={onClick}
     >
       <CardContent className="p-2">
-        <h3 className="font-bold truncate">{dataset.name}</h3>
+        <h3 className="font-bold truncate pr-6">{dataset.name}</h3>
         <p className="text-sm">Rows: {dataset.rowCount}</p>
         <p className="text-sm">Columns: {dataset.columnCount}</p>
         <p className="text-sm">Size: {formatFileSize(dataset.fileSize)}</p>

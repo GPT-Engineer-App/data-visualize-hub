@@ -14,19 +14,22 @@ const UploadData = () => {
   const [preview, setPreview] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [useHeaderRow, setUseHeaderRow] = useState(true);
+  const [totalRows, setTotalRows] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedFile = localStorage.getItem('uploadedFile');
-    if (savedFile) {
-      setFile(JSON.parse(savedFile));
+    const savedFileData = localStorage.getItem('uploadedFileData');
+    if (savedFileData) {
+      const { file, preview, totalRows } = JSON.parse(savedFileData);
+      setFile(file);
+      setPreview(preview);
+      setTotalRows(totalRows);
     }
   }, []);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile);
-    localStorage.setItem('uploadedFile', JSON.stringify(selectedFile));
     parseFile(selectedFile);
   };
 
@@ -35,21 +38,48 @@ const UploadData = () => {
     reader.onload = (e) => {
       const content = e.target.result;
       let parsedData;
+      let total = 0;
 
       if (file.name.endsWith('.csv')) {
-        parsedData = Papa.parse(content, { header: useHeaderRow, preview: 50 }).data;
+        Papa.parse(content, {
+          header: useHeaderRow,
+          complete: (results) => {
+            parsedData = results.data.slice(0, 50);
+            total = results.data.length;
+            setPreview(parsedData);
+            setTotalRows(total);
+            setShowPreview(true);
+            saveToLocalStorage(file, parsedData, total);
+          }
+        });
       } else if (file.name.endsWith('.json')) {
-        parsedData = JSON.parse(content).slice(0, 50);
+        parsedData = JSON.parse(content);
+        total = parsedData.length;
+        setPreview(parsedData.slice(0, 50));
+        setTotalRows(total);
+        setShowPreview(true);
+        saveToLocalStorage(file, parsedData.slice(0, 50), total);
       } else if (file.name.endsWith('.xml')) {
         // For simplicity, we'll just show the raw XML content
         parsedData = [{ content: content.slice(0, 1000) + '...' }];
+        total = 1;
+        setPreview(parsedData);
+        setTotalRows(total);
+        setShowPreview(true);
+        saveToLocalStorage(file, parsedData, total);
       }
-
-      setPreview(parsedData);
-      setShowPreview(true);
     };
     reader.readAsText(file);
   }, [useHeaderRow]);
+
+  const saveToLocalStorage = (file, preview, totalRows) => {
+    const fileData = {
+      file: { name: file.name, size: file.size },
+      preview,
+      totalRows
+    };
+    localStorage.setItem('uploadedFileData', JSON.stringify(fileData));
+  };
 
   useEffect(() => {
     if (file) {
@@ -63,8 +93,8 @@ const UploadData = () => {
       datasets.push({
         name: file.name,
         date: new Date().toISOString(),
-        rowCount: preview.length,
-        columnCount: Object.keys(preview[0]).length,
+        rowCount: totalRows,
+        columnCount: preview && preview.length > 0 ? Object.keys(preview[0]).length : 0,
         fileSize: file.size
       });
       localStorage.setItem('datasets', JSON.stringify(datasets));
@@ -122,6 +152,7 @@ const UploadData = () => {
             />
             <Label htmlFor="use-header">Use First Row as Header</Label>
           </div>
+          <p className="mt-2">Total Rows: {totalRows}</p>
           <DialogFooter>
             <Button onClick={saveDataset}>Save Dataset</Button>
           </DialogFooter>
