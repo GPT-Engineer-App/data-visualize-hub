@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LineChart from '../components/charts/LineChart';
 import BarChart from '../components/charts/BarChart';
@@ -8,37 +7,43 @@ import Heatmap from '../components/charts/Heatmap';
 
 const Overview = () => {
   const [data, setData] = useState({
-    lineData: Array.from({ length: 10 }, () => Math.floor(Math.random() * 100)),
-    barData: Array.from({ length: 5 }, () => Math.floor(Math.random() * 100)),
-    scatterData: Array.from({ length: 20 }, () => ({ x: Math.random() * 100, y: Math.random() * 100 })),
-    heatmapData: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => Math.floor(Math.random() * 100))),
+    lineData: [],
+    barData: [],
+    scatterData: [],
+    heatmapData: [],
   });
 
   useEffect(() => {
-    const socket = io('http://localhost:3001'); // Replace with your WebSocket server URL
-
-    socket.on('dataUpdate', (newData) => {
-      setData(newData);
-    });
-
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setData(prevData => ({
-        lineData: [...prevData.lineData.slice(1), Math.floor(Math.random() * 100)],
-        barData: prevData.barData.map(() => Math.floor(Math.random() * 100)),
-        scatterData: prevData.scatterData.map(() => ({ x: Math.random() * 100, y: Math.random() * 100 })),
-        heatmapData: prevData.heatmapData.map(row => row.map(() => Math.floor(Math.random() * 100))),
-      }));
-    }, 3000);
-
-    return () => {
-      socket.disconnect();
-      clearInterval(interval);
-    };
+    const activeDataset = localStorage.getItem('activeDataset');
+    if (activeDataset) {
+      // Fetch the data for the active dataset
+      const datasets = JSON.parse(localStorage.getItem('datasets') || '[]');
+      const selectedDataset = datasets.find(dataset => dataset.name === activeDataset);
+      
+      if (selectedDataset) {
+        // For demonstration purposes, we'll generate random data based on the dataset's properties
+        const generateRandomData = (length) => Array.from({ length }, () => Math.floor(Math.random() * 100));
+        
+        setData({
+          lineData: generateRandomData(selectedDataset.columnCount),
+          barData: generateRandomData(selectedDataset.columnCount),
+          scatterData: Array.from({ length: selectedDataset.columnCount }, () => ({ x: Math.random() * 100, y: Math.random() * 100 })),
+          heatmapData: Array.from({ length: 10 }, () => generateRandomData(10)),
+        });
+      }
+    } else {
+      // If no dataset is selected, clear the charts
+      setData({
+        lineData: [],
+        barData: [],
+        scatterData: [],
+        heatmapData: [],
+      });
+    }
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <Card>
         <CardHeader>
           <CardTitle>Line Chart</CardTitle>
