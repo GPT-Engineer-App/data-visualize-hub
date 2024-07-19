@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const DatasetBox = ({ dataset, isActive, onClick }) => {
   const formatFileSize = (bytes) => {
@@ -32,15 +33,32 @@ const DatasetBox = ({ dataset, isActive, onClick }) => {
 const Data = () => {
   const [datasets, setDatasets] = useState([]);
   const [activeDataset, setActiveDataset] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedDatasets = JSON.parse(localStorage.getItem('datasets') || '[]');
     setDatasets(savedDatasets);
+    
+    // Load the active dataset from localStorage
+    const savedActiveDataset = localStorage.getItem('activeDataset');
+    if (savedActiveDataset) {
+      setActiveDataset(savedActiveDataset);
+    }
   }, []);
 
   const handleDatasetClick = (dataset) => {
-    setActiveDataset(dataset.name === activeDataset ? null : dataset.name);
-    // Here you would update the visuals based on the active dataset
+    const newActiveDataset = dataset.name === activeDataset ? null : dataset.name;
+    setActiveDataset(newActiveDataset);
+    
+    // Save the active dataset to localStorage
+    if (newActiveDataset) {
+      localStorage.setItem('activeDataset', newActiveDataset);
+    } else {
+      localStorage.removeItem('activeDataset');
+    }
+    
+    // Navigate to the Overview page
+    navigate('/');
   };
 
   return (
