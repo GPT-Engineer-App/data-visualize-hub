@@ -31,28 +31,30 @@ const Build = () => {
       
       if (selectedDataset) {
         // Fetch the actual data and headers from the dataset
-        // For this example, we'll simulate it with random data
-        const simulateDataFromDataset = () => {
-          const rowCount = selectedDataset.rowCount;
-          const columnCount = selectedDataset.columnCount;
-          const simulatedHeaders = Array.from({ length: columnCount }, (_, i) => `Field ${i + 1}`);
-          const simulatedData = Array.from({ length: rowCount }, () => 
-            Object.fromEntries(simulatedHeaders.map(header => [header, Math.random() * 100]))
-          );
-          return { headers: simulatedHeaders, data: simulatedData };
-        };
-
-        const { headers, data } = simulateDataFromDataset();
-        setHeaders(headers);
-        setData({
-          lineData: data,
-          barData: data,
-          scatterData: data.map(row => ({ x: row[headers[0]], y: row[headers[1]] })),
-          heatmapData: data.slice(0, 10).map(row => Object.values(row).slice(0, 10)),
-        });
+        fetchDatasetContent(selectedDataset.name);
       }
     }
   }, []);
+
+  const fetchDatasetContent = async (datasetName) => {
+    try {
+      const response = await fetch(`/api/datasets/${datasetName}`);
+      if (!response.ok) throw new Error('Failed to fetch dataset');
+      const content = await response.json();
+      
+      // Assuming the API returns an object with headers and data
+      setHeaders(content.headers);
+      setData({
+        lineData: content.data,
+        barData: content.data,
+        scatterData: content.data.map(row => ({ x: row[content.headers[0]], y: row[content.headers[1]] })),
+        heatmapData: content.data.slice(0, 10).map(row => Object.values(row).slice(0, 10)),
+      });
+    } catch (error) {
+      console.error('Error fetching dataset:', error);
+      // Handle error (e.g., show a notification to the user)
+    }
+  };
 
   const handleFieldChange = (chart, field, value) => {
     setSelectedFields(prev => ({
@@ -60,15 +62,22 @@ const Build = () => {
       [chart]: { ...prev[chart], [field]: value }
     }));
     // Here you would typically update the chart data based on the selected fields
+    updateChartData(chart, field, value);
+  };
+
+  const updateChartData = (chart, field, value) => {
+    // Implementation depends on how you want to update each chart type
+    // This is a placeholder for the actual implementation
+    console.log(`Updating ${chart} with ${field} set to ${value}`);
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-      <Card>
+      <Card className="w-full h-[400px]">
         <CardHeader>
           <CardTitle>Line Chart</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[calc(100%-4rem)]">
           <div className="grid grid-cols-2 gap-2 mb-4">
             <Select onValueChange={(value) => handleFieldChange('lineChart', 'xAxis', value)}>
               <SelectTrigger>
@@ -90,35 +99,17 @@ const Build = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Select onValueChange={(value) => handleFieldChange('lineChart', 'value', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Value" />
-              </SelectTrigger>
-              <SelectContent>
-                {headers.map((header, index) => (
-                  <SelectItem key={index} value={header}>{header}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select onValueChange={(value) => handleFieldChange('lineChart', 'series', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Series" />
-              </SelectTrigger>
-              <SelectContent>
-                {headers.map((header, index) => (
-                  <SelectItem key={index} value={header}>{header}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
-          <LineChart data={data.lineData} />
+          <div className="h-[calc(100%-3rem)]">
+            <LineChart data={data.lineData} />
+          </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="w-full h-[400px]">
         <CardHeader>
           <CardTitle>Bar Chart</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[calc(100%-4rem)]">
           <div className="grid grid-cols-2 gap-2 mb-4">
             <Select onValueChange={(value) => handleFieldChange('barChart', 'xAxis', value)}>
               <SelectTrigger>
@@ -140,35 +131,17 @@ const Build = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Select onValueChange={(value) => handleFieldChange('barChart', 'value', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Value" />
-              </SelectTrigger>
-              <SelectContent>
-                {headers.map((header, index) => (
-                  <SelectItem key={index} value={header}>{header}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select onValueChange={(value) => handleFieldChange('barChart', 'series', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Series" />
-              </SelectTrigger>
-              <SelectContent>
-                {headers.map((header, index) => (
-                  <SelectItem key={index} value={header}>{header}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
-          <BarChart data={data.barData} />
+          <div className="h-[calc(100%-3rem)]">
+            <BarChart data={data.barData} />
+          </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="w-full h-[400px]">
         <CardHeader>
           <CardTitle>Scatter Plot</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[calc(100%-4rem)]">
           <div className="flex gap-2 mb-4">
             <Select onValueChange={(value) => handleFieldChange('scatterPlotX', value)}>
               <SelectTrigger className="w-full">
@@ -191,14 +164,16 @@ const Build = () => {
               </SelectContent>
             </Select>
           </div>
-          <ScatterPlot data={data.scatterData} />
+          <div className="h-[calc(100%-3rem)]">
+            <ScatterPlot data={data.scatterData} />
+          </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="w-full h-[400px]">
         <CardHeader>
           <CardTitle>Heatmap</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[calc(100%-4rem)]">
           <div className="flex gap-2 mb-4">
             <Select onValueChange={(value) => handleFieldChange('heatmapX', value)}>
               <SelectTrigger className="w-full">
@@ -221,7 +196,9 @@ const Build = () => {
               </SelectContent>
             </Select>
           </div>
-          <Heatmap data={data.heatmapData} />
+          <div className="h-[calc(100%-3rem)]">
+            <Heatmap data={data.heatmapData} />
+          </div>
         </CardContent>
       </Card>
     </div>
