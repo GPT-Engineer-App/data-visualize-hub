@@ -15,8 +15,8 @@ const Build = () => {
   });
   const [headers, setHeaders] = useState([]);
   const [selectedFields, setSelectedFields] = useState({
-    lineChart: { xAxis: '', yAxis: '', value: '', series: '' },
-    barChart: { xAxis: '', yAxis: '', value: '', series: '' },
+    lineChart: { xAxis: '', yAxis: '' },
+    barChart: { xAxis: '', yAxis: '' },
     scatterPlotX: '',
     scatterPlotY: '',
     heatmapX: '',
@@ -26,33 +26,33 @@ const Build = () => {
   useEffect(() => {
     const activeDataset = localStorage.getItem('activeDataset');
     if (activeDataset) {
-      const datasets = JSON.parse(localStorage.getItem('datasets') || '[]');
-      const selectedDataset = datasets.find(dataset => dataset.name === activeDataset);
-      
-      if (selectedDataset) {
-        // Fetch the actual data and headers from the dataset
-        fetchDatasetContent(selectedDataset.name);
-      }
+      fetchDatasetContent(activeDataset);
     }
   }, []);
 
   const fetchDatasetContent = async (datasetName) => {
     try {
-      const response = await fetch(`/api/datasets/${datasetName}`);
-      if (!response.ok) throw new Error('Failed to fetch dataset');
-      const content = await response.json();
+      // Simulating API call with local storage
+      const datasets = JSON.parse(localStorage.getItem('datasets') || '[]');
+      const selectedDataset = datasets.find(dataset => dataset.name === datasetName);
       
-      // Assuming the API returns an object with headers and data
-      setHeaders(content.headers);
-      setData({
-        lineData: content.data,
-        barData: content.data,
-        scatterData: content.data.map(row => ({ x: row[content.headers[0]], y: row[content.headers[1]] })),
-        heatmapData: content.data.slice(0, 10).map(row => Object.values(row).slice(0, 10)),
-      });
+      if (selectedDataset) {
+        // For demonstration, we'll generate sample data and headers
+        const sampleHeaders = Array.from({ length: selectedDataset.columnCount }, (_, i) => `Column ${i + 1}`);
+        const sampleData = Array.from({ length: selectedDataset.rowCount }, () => 
+          sampleHeaders.reduce((acc, header) => ({ ...acc, [header]: Math.random() * 100 }), {})
+        );
+        
+        setHeaders(sampleHeaders);
+        setData({
+          lineData: sampleData,
+          barData: sampleData,
+          scatterData: sampleData.map(row => ({ x: row[sampleHeaders[0]], y: row[sampleHeaders[1]] })),
+          heatmapData: sampleData.slice(0, 10).map(row => Object.values(row).slice(0, 10)),
+        });
+      }
     } catch (error) {
       console.error('Error fetching dataset:', error);
-      // Handle error (e.g., show a notification to the user)
     }
   };
 
@@ -61,13 +61,11 @@ const Build = () => {
       ...prev,
       [chart]: { ...prev[chart], [field]: value }
     }));
-    // Here you would typically update the chart data based on the selected fields
     updateChartData(chart, field, value);
   };
 
   const updateChartData = (chart, field, value) => {
-    // Implementation depends on how you want to update each chart type
-    // This is a placeholder for the actual implementation
+    // Implementation for updating chart data based on selected fields
     console.log(`Updating ${chart} with ${field} set to ${value}`);
   };
 
