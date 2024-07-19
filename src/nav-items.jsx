@@ -1,9 +1,10 @@
-import { BarChart3, Database, Home, PieChart, Upload } from "lucide-react";
+import { BarChart3, Database, Home, PieChart, Upload, Wrench } from "lucide-react";
 import Overview from "./pages/Overview";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import UploadData from "./pages/UploadData";
 import Data from "./pages/Data";
+import Build from "./pages/Build";
 
 export const navItems = [
   {
@@ -35,5 +36,11 @@ export const navItems = [
     to: "/data",
     icon: <Database className="h-4 w-4" />,
     page: <Data />,
+  },
+  {
+    title: "Build",
+    to: "/build",
+    icon: <Wrench className="h-4 w-4" />,
+    page: <Build />,
   },
 ];
